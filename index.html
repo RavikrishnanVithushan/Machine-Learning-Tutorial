@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>How MLP Depth Affects Performance: A Hands-On Tutorial</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Tutorial exploring how the depth of a Multilayer Perceptron (MLP) affects performance and overfitting on the Fashion-MNIST dataset.">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-alt: #111827;
+      --card: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.2);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --danger: #f97373;
+      --code-bg: #020617;
+      --heading: #f9fafb;
+      --max-width: 900px;
+      --radius-lg: 18px;
+      --radius-sm: 8px;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.9);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 45%, #000 100%);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    main {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 3.5rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--muted);
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.25);
+    }
+
+    h1 {
+      font-size: clamp(1.9rem, 4vw, 2.4rem);
+      margin: 0.75rem 0;
+      color: var(--heading);
+      letter-spacing: 0.02em;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 620px;
+      margin: 0.5rem auto 0;
+      font-size: 0.95rem;
+    }
+
+    .meta {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.32);
+    }
+
+    .grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 900px) {
+      .grid-2 {
+        grid-template-columns: 1.2fr 0.9fr;
+      }
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, rgba(56,189,248,0.09), transparent 55%),
+                  radial-gradient(circle at bottom right, rgba(59,130,246,0.2), transparent 55%),
+                  var(--card);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow: var(--shadow-soft);
+      padding: 1.35rem 1.3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(248, 250, 252, 0.06), transparent 52%);
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      margin-top: 0;
+      margin-bottom: 0.4rem;
+      color: var(--heading);
+    }
+
+    .card h3 {
+      font-size: 1rem;
+      margin-top: 1.1rem;
+      margin-bottom: 0.4rem;
+      color: var(--heading);
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+
+    .highlight {
+      border-left: 3px solid var(--accent);
+      padding-left: 0.7rem;
+      margin: 0.8rem 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    code, pre {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.8rem;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      padding: 0.85rem;
+      overflow-x: auto;
+      margin: 0.7rem 0 1rem;
+    }
+
+    pre::-webkit-scrollbar {
+      height: 6px;
+    }
+    pre::-webkit-scrollbar-thumb {
+      background: #4b5563;
+      border-radius: 999px;
+    }
+
+    .kbd {
+      font-family: inherit;
+      font-size: 0.75rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      padding: 0.08rem 0.35rem;
+      background: rgba(15,23,42,0.85);
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .tab-bar {
+      display: inline-flex;
+      border-radius: 999px;
+      padding: 0.15rem;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      margin-bottom: 0.5rem;
+    }
+
+    .tab-button {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 0.8rem;
+      padding: 0.2rem 0.75rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .tab-button[aria-selected="true"] {
+      background: var(--accent-soft);
+      color: var(--heading);
+    }
+
+    .tab-panel {
+      display: none;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .badge-small {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .color-palette {
+      display: flex;
+      gap: 0.4rem;
+      margin-top: 0.3rem;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(15,23,42,0.75);
+    }
+
+    .swatch.blue   { background: #2563eb; }
+    .swatch.orange { background: #f97316; }
+    .swatch.purple { background: #a855f7; }
+
+    .section-heading {
+      margin: 2rem 0 0.8rem;
+      font-size: 1.1rem;
+      color: var(--heading);
+    }
+
+    ul, ol {
+      padding-left: 1.25rem;
+    }
+
+    li {
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .footer {
+      margin-top: 2.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .callout {
+      margin-top: 0.75rem;
+      border-radius: var(--radius-sm);
+      border: 1px dashed rgba(148,163,184,0.6);
+      padding: 0.7rem 0.8rem;
+      background: rgba(15,23,42,0.7);
+      font-size: 0.85rem;
+    }
+
+    .inline-math {
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.85em;
+      background: rgba(15,23,42,0.9);
+      padding: 0.08rem 0.28rem;
+      border-radius: 4px;
+    }
+
+    /* Expandable sections */
+    details {
+      margin-top: 0.7rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid rgba(148,163,184,0.4);
+      background: rgba(15,23,42,0.8);
+      padding: 0.55rem 0.7rem 0.6rem;
+    }
+    details summary {
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--heading);
+      list-style: none;
+    }
+    details summary::marker,
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+    details[open] {
+      border-color: var(--accent);
+    }
+    details p, details ul {
+      margin-top: 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    /* Anchor headings for screen readers */
+    h2[id], h3[id] {
+      scroll-margin-top: 80px;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(to bottom, rgba(15,23,42,0.96), rgba(15,23,42,0.75), transparent);
+      backdrop-filter: blur(16px);
+      margin-bottom: 0.75rem;
+    }
+
+    .nav-inner {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 0.4rem 1.25rem 0.7rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--muted);
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+    }
+
+    .nav-links a:hover {
+      background: rgba(15,23,42,0.9);
+      color: var(--heading);
+    }
+
+    .nav-brand {
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+
+  </style>
+</head>
+<body>
+  <nav aria-label="Tutorial navigation">
+    <div class="nav-inner">
+      <div class="nav-brand">MLP Depth Tutorial</div>
+      <div class="nav-links">
+        <a href="#intro">Intro</a>
+        <a href="#theory">Theory</a>
+        <a href="#experiment">Experiment</a>
+        <a href="#results">Results</a>
+        <a href="#accessibility">Accessibility</a>
+        <a href="#references">References</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <header id="intro">
+      <div class="badge" aria-label="Tutorial meta information">
+        <span class="badge-dot" aria-hidden="true"></span>
+        Deep Learning · Multilayer Perceptron
+      </div>
+      <h1>Does Making an MLP Deeper Always Make It Better?</h1>
+      <p class="subtitle">
+        In this tutorial we explore how the number of hidden layers in a Multilayer Perceptron (MLP)
+        changes its performance and overfitting behaviour on the Fashion-MNIST image classification task.
+        The goal is to give you enough intuition and code so you can design sensible MLPs in your own work.
+      </p>
+      <div class="meta">
+        <span>⏱ &lt; 10 minute read</span>
+        <span>📊 Dataset: Fashion-MNIST (10 classes, 28×28 grayscale images)</span>
+        <span class="pill">GitHub: <a href="YOUR_GITHUB_REPO_URL_HERE" target="_blank" rel="noopener">repository link</a></span>
+      </div>
+    </header>
+
+    <section class="grid grid-2">
+      <article class="card" aria-labelledby="theory-heading" id="theory">
+        <h2 id="theory-heading">1. Intuition: What Is an MLP, and What Does “Depth” Mean?</h2>
+        <p>
+          A Multilayer Perceptron (MLP) is a stack of fully connected layers. Each neuron computes a
+          weighted sum of its inputs plus a bias, then passes this through a nonlinear activation. For
+          a neuron with weights <span class="inline-math">w</span>, input
+          <span class="inline-math">x</span> and bias <span class="inline-math">b</span>, we compute
+          <span class="inline-math">z = wᵀx + b</span>, then apply an activation such as ReLU.
+        </p>
+        <p>
+          The network has an <strong>input layer</strong> (our pixels), one or more
+          <strong>hidden layers</strong>, and an <strong>output layer</strong> that returns class
+          probabilities. When we talk about depth in this tutorial, we specifically mean the
+          <em>number of hidden layers</em>.
+        </p>
+
+        <div class="highlight" role="note">
+          <strong>Key idea:</strong> deeper MLPs can represent more complex functions with fewer neurons,
+          but they are also harder to train and more likely to overfit if we are not careful.
+        </div>
+
+        <p>
+          Training an MLP means finding weights that minimise a loss function (here:
+          cross-entropy) using stochastic gradient descent (we will use the Adam optimiser). We
+          monitor both <strong>training</strong> and <strong>validation</strong> performance to see
+          how well the model generalises beyond the data it directly sees during optimisation.
+        </p>
+
+        <h3>Overfitting vs generalisation</h3>
+        <p>
+          As we increase depth, the model’s capacity grows. At first this is helpful: the MLP
+          captures more of the structure in the data. But past a certain point, the model can start
+          to memorise noise instead of learning general patterns. This appears as:
+        </p>
+        <ul>
+          <li>Training accuracy keeps climbing.</li>
+          <li>Validation accuracy saturates or gets worse.</li>
+          <li>Validation loss may start to increase even while training loss decreases.</li>
+        </ul>
+        <p>
+          Our experiment is designed to visualise exactly this effect.
+        </p>
+      </article>
+
+      <aside class="card" aria-labelledby="setup-heading">
+        <h2 id="setup-heading">2. Experimental Setup at a Glance</h2>
+
+        <h3>Dataset: Fashion-MNIST</h3>
+        <p>
+          Fashion-MNIST contains 70,000 clothing images (28×28 grayscale), split into
+          60,000 training and 10,000 test samples. There are 10 classes such as T-shirt/top,
+          trouser, pullover and sneaker. Compared to classic digit MNIST, it is slightly more
+          challenging but still small enough to train quickly on a CPU.
+        </p>
+
+        <h3>What we vary (and keep fixed)</h3>
+        <ul>
+          <li><strong>Variable:</strong> number of hidden layers (depth) ∈ {1, 2, 4}.</li>
+          <li><strong>Hidden units:</strong> 128 neurons per hidden layer.</li>
+          <li><strong>Activation:</strong> ReLU for hidden layers, softmax for output.</li>
+          <li><strong>Optimiser:</strong> Adam, learning rate 1e-3.</li>
+          <li><strong>Batch size:</strong> 128.</li>
+          <li><strong>Epochs:</strong> 20.</li>
+          <li><strong>Split:</strong> 50k train / 10k validation / 10k test.</li>
+        </ul>
+
+        <details>
+          <summary>Why only up to 4 layers?</summary>
+          <p>
+            The goal is not to build the best possible Fashion-MNIST classifier, but to show how
+            behaviour changes with depth while keeping training fast. Very deep fully connected
+            networks on small images tend to overfit heavily without additional regularisation.
+          </p>
+        </details>
+
+        <div class="callout" id="experiment">
+          <strong>Reproducibility:</strong> All code used to generate the plots in this tutorial is
+          available in the accompanying Jupyter notebook:
+          <code>mlp_depth_fashion_mnist.ipynb</code>. You can run it end-to-end to reproduce the
+          figures.
+        </div>
+      </aside>
+    </section>
+
+    <section aria-labelledby="code-heading">
+      <h2 class="section-heading" id="code-heading">3. Core Code: Building and Training MLPs with Different Depths</h2>
+
+      <p>
+        The notebook uses TensorFlow / Keras. Below is a simplified version of the key parts.
+        Installation (e.g. <code>pip install tensorflow</code>) is included in the notebook but omitted here
+        for brevity.
+      </p>
+
+      <div class="badge-small" aria-label="Interactive code tabs">
+        <span>💻 Toggle between data prep and model code:</span>
+      </div>
+
+      <div class="tab-bar" role="tablist" aria-label="Code sections">
+        <button class="tab-button" role="tab" aria-selected="true" aria-controls="tab-data" id="tab-btn-data">
+          3.1 Data preparation
+        </button>
+        <button class="tab-button" role="tab" aria-selected="false" aria-controls="tab-model" id="tab-btn-model">
+          3.2 Model &amp; training loop
+        </button>
+      </div>
+
+      <div id="tab-data" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-data">
+        <pre aria-label="Python code for loading and preparing Fashion-MNIST"><code># 3.1 Data preparation (in notebook: see first cell)
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
+
+# Load Fashion-MNIST
+(x_train, y_train), (x_test, y_test) = keras.datasets.fashion_mnist.load_data()
+
+# Normalise pixel values to [0, 1]
+x_train = x_train.astype("float32") / 255.0
+x_test  = x_test.astype("float32") / 255.0
+
+# Flatten 28x28 -> 784 for the MLP
+x_train = x_train.reshape(-1, 28 * 28)
+x_test  = x_test.reshape(-1, 28 * 28)
+
+# Split train into train + validation
+x_val = x_train[-10000:]
+y_val = y_train[-10000:]
+x_train_small = x_train[:-10000]
+y_train_small = y_train[:-10000]</code></pre>
+      </div>
+
+      <div id="tab-model" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-model">
+        <pre aria-label="Python code for creating and training MLPs with variable depth"><code># 3.2 Creating an MLP with variable depth
+def create_mlp(num_hidden_layers=1, hidden_units=128, input_dim=784, num_classes=10):
+    model = keras.Sequential()
+    model.add(layers.Input(shape=(input_dim,)))
+
+    for _ in range(num_hidden_layers):
+        model.add(layers.Dense(hidden_units, activation="relu"))
+
+    model.add(layers.Dense(num_classes, activation="softmax"))
+
+    model.compile(
+        optimizer=keras.optimizers.Adam(learning_rate=1e-3),
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"],
+    )
+    return model
+
+depths = [1, 2, 4]
+histories = {}
+test_scores = {}
+
+for d in depths:
+    print(f"Training MLP with depth = {d} hidden layers")
+    model = create_mlp(num_hidden_layers=d)
+
+    history = model.fit(
+        x_train_small, y_train_small,
+        validation_data=(x_val, y_val),
+        epochs=20,
+        batch_size=128,
+        verbose=2,
+    )
+
+    histories[d] = history.history
+
+    test_loss, test_acc = model.evaluate(x_test, y_test, verbose=0)
+    test_scores[d] = (test_loss, test_acc)
+    print(f"Depth {d}, test accuracy = {test_acc:.4f}")</code></pre>
+      </div>
+
+      <p>
+        The notebook then uses Matplotlib to create two main visual summaries:
+      </p>
+      <ol>
+        <li>Training vs validation accuracy curves for each depth.</li>
+        <li>Test accuracy bar chart comparing depths 1, 2 and 4.</li>
+      </ol>
+    </section>
+
+    <section aria-labelledby="results-heading" id="results">
+      <h2 class="section-heading" id="results-heading">4. Results: What Happens as We Make the MLP Deeper?</h2>
+
+      <article class="card">
+        <h3>4.1 Accuracy curves over epochs</h3>
+        <p>
+          The first figure in the notebook shows training and validation accuracy as a function of
+          epoch for each depth. In my runs, a consistent pattern emerged:
+        </p>
+        <ul>
+          <li>
+            Going from <strong>1 → 2 hidden layers</strong> improved both validation and test
+            accuracy. The model gained enough capacity to capture more structure in Fashion-MNIST.
+          </li>
+          <li>
+            Going from <strong>2 → 4 hidden layers</strong> increased training accuracy further, but
+            validation accuracy only improved slightly and sometimes became noisier.
+          </li>
+        </ul>
+        <p>
+          This is a classic signal of overfitting: the deepest model is powerful enough to almost
+          memorise the training samples, but not all of that extra complexity translates into better
+          generalisation.
+        </p>
+
+        <h3>4.2 Test accuracy comparison</h3>
+        <p>
+          The second figure (a simple bar chart) summarises final test accuracy. Exact numbers
+          depend on the random seed, but a typical outcome was:
+        </p>
+        <ul>
+          <li>Depth 1: solid baseline performance.</li>
+          <li>Depth 2: usually the best test accuracy.</li>
+          <li>Depth 4: similar or only slightly better than depth 2, despite higher complexity.</li>
+        </ul>
+
+        <div class="highlight">
+          <strong>Take-away:</strong> there is a “sweet spot” where the MLP is deep enough to model
+          the data but not so deep that it burns capacity on noise. For this simple image task, two
+          hidden layers of width 128 strike a good balance.
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>4.3 Practical advice: how to pick depth in your own projects</h3>
+        <ul>
+          <li>
+            <strong>Start shallow:</strong> begin with 1–2 hidden layers and a reasonable width
+            (e.g. 64–256 units).
+          </li>
+          <li>
+            <strong>Use a validation set:</strong> always monitor validation loss and accuracy, not
+            just training metrics.
+          </li>
+          <li>
+            <strong>Increase depth only when needed:</strong> if both training and validation
+            performance are poor and underfitting is likely, then consider adding depth or width.
+          </li>
+          <li>
+            <strong>Add regularisation for deeper MLPs:</strong> techniques such as dropout,
+            weight decay (L2), and early stopping help control overfitting when you do need deeper
+            networks.
+          </li>
+          <li>
+            <strong>For images, consider CNNs:</strong> for more realistic image tasks, convolutional
+            neural networks are usually a better architectural choice than very deep fully connected
+            MLPs.
+          </li>
+        </ul>
+      </article>
+    </section>
+
+    <section aria-labelledby="accessibility-heading" id="accessibility">
+      <h2 class="section-heading" id="accessibility-heading">5. Accessibility and Design Choices</h2>
+      <p>
+        I tried to make both the tutorial and the accompanying notebook accessible and easy to
+        reuse:
+      </p>
+      <ul>
+        <li>
+          <strong>Colour-blind-friendly plots:</strong> in the notebook, I use a simple palette
+          (blue, orange, purple) with solid and dashed lines to ensure curves remain distinguishable
+          even without colour.
+        </li>
+        <li>
+          <strong>Alt text for figures:</strong> when exporting figures to files (e.g.
+          <code>acc_curves.png</code>, <code>test_acc_bars.png</code>), I describe them with alt text such as
+          “Validation accuracy vs epochs for MLPs with 1, 2, and 4 hidden layers”.
+        </li>
+        <li>
+          <strong>Readable contrast:</strong> this page uses a dark background with light text and
+          high contrast borders to remain legible.
+        </li>
+        <li>
+          <strong>Semantic HTML:</strong> using headings, lists and landmarks (such as
+          <code>&lt;nav&gt;</code> and <code>&lt;main&gt;</code>) helps screen readers navigate the tutorial.
+        </li>
+        <li>
+          <strong>Transcript-like narrative:</strong> the structure of this page could be used
+          directly as a spoken script for a short video if needed.
+        </li>
+      </ul>
+
+      <div class="color-palette" aria-label="Plot colour palette used in the notebook">
+        <div class="swatch blue" title="Blue for training curves"></div>
+        <div class="swatch orange" title="Orange for validation curves"></div>
+        <div class="swatch purple" title="Purple for deeper models or comparisons"></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="references-heading" id="references">
+      <h2 class="section-heading" id="references-heading">6. References and Further Reading</h2>
+      <p>
+        The following resources informed this tutorial and are good starting points if you want to
+        go deeper into MLPs and model capacity:
+      </p>
+      <ol>
+        <li>
+          I. Goodfellow, Y. Bengio, A. Courville,
+          <em>Deep Learning</em>, MIT Press, 2016. (Chapters on feedforward networks and capacity /
+          regularisation.)
+        </li>
+        <li>
+          Y. LeCun, Y. Bengio, G. Hinton,
+          “Deep learning,” <em>Nature</em>, 521, 436–444, 2015.
+        </li>
+        <li>
+          H. Xiao, K. Rasul, R. Vollgraf,
+          “Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms,”
+          2017. Dataset and description at the official Fashion-MNIST repository.
+        </li>
+        <li>
+          TensorFlow/Keras documentation:
+          <a href="https://keras.io/" target="_blank" rel="noopener">https://keras.io/</a>
+          – for API details on <code>Dense</code> layers, optimisers and training loops.
+        </li>
+        <li>
+          Various blog posts and tutorials on overfitting, train/validation/test splits and model
+          selection were consulted to cross-check explanations, but the examples and wording here
+          are my own.
+        </li>
+      </ol>
+      <p>
+        The GitHub repository for this tutorial (including the notebook, exported figures and this
+        webpage) is available at:
+        <a href="YOUR_GITHUB_REPO_URL_HERE" target="_blank" rel="noopener">YOUR_GITHUB_REPO_URL_HERE</a>.
+      </p>
+    </section>
+
+    <footer class="footer">
+      <p>
+        Built as part of a machine learning coursework to teach how MLP depth affects performance
+        and overfitting on a real dataset. Code is provided so that you can rerun and adapt the
+        experiment for your own projects.
+      </p>
+    </footer>
+  </main>
+
+  <script>
+    // Simple tab switcher for code blocks (accessibility-friendly)
+    (function () {
+      const tabButtons = document.querySelectorAll(".tab-button");
+      const tabPanels  = document.querySelectorAll(".tab-panel");
+
+      tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const targetId = btn.getAttribute("aria-controls");
+
+          tabButtons.forEach(b => b.setAttribute("aria-selected", "false"));
+          tabPanels.forEach(p => p.classList.remove("active"));
+
+          btn.setAttribute("aria-selected", "true");
+          document.getElementById(targetId).classList.add("active");
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
