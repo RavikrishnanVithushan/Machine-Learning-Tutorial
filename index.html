@@ -392,7 +392,6 @@
         <a href="#theory">Theory</a>
         <a href="#experiment">Experiment</a>
         <a href="#results">Results</a>
-        <a href="#accessibility">Accessibility</a>
         <a href="#references">References</a>
       </div>
     </div>
@@ -413,7 +412,7 @@
       <div class="meta">
         <span>⏱ &lt; 10 minute read</span>
         <span>📊 Dataset: Fashion-MNIST (10 classes, 28×28 grayscale images)</span>
-        <span class="pill">GitHub: <a href="YOUR_GITHUB_REPO_URL_HERE" target="_blank" rel="noopener">repository link</a></span>
+        <span class="pill">GitHub: <a href="https://github.com/RavikrishnanVithushan/Machine-Learning-Tutorial" target="_blank" rel="noopener">repository link</a></span>
       </div>
     </header>
 
@@ -669,45 +668,7 @@ for d in depths:
           </li>
         </ul>
       </article>
-    </section>
-
-    <section aria-labelledby="accessibility-heading" id="accessibility">
-      <h2 class="section-heading" id="accessibility-heading">5. Accessibility and Design Choices</h2>
-      <p>
-        I tried to make both the tutorial and the accompanying notebook accessible and easy to
-        reuse:
-      </p>
-      <ul>
-        <li>
-          <strong>Colour-blind-friendly plots:</strong> in the notebook, I use a simple palette
-          (blue, orange, purple) with solid and dashed lines to ensure curves remain distinguishable
-          even without colour.
-        </li>
-        <li>
-          <strong>Alt text for figures:</strong> when exporting figures to files (e.g.
-          <code>acc_curves.png</code>, <code>test_acc_bars.png</code>), I describe them with alt text such as
-          “Validation accuracy vs epochs for MLPs with 1, 2, and 4 hidden layers”.
-        </li>
-        <li>
-          <strong>Readable contrast:</strong> this page uses a dark background with light text and
-          high contrast borders to remain legible.
-        </li>
-        <li>
-          <strong>Semantic HTML:</strong> using headings, lists and landmarks (such as
-          <code>&lt;nav&gt;</code> and <code>&lt;main&gt;</code>) helps screen readers navigate the tutorial.
-        </li>
-        <li>
-          <strong>Transcript-like narrative:</strong> the structure of this page could be used
-          directly as a spoken script for a short video if needed.
-        </li>
-      </ul>
-
-      <div class="color-palette" aria-label="Plot colour palette used in the notebook">
-        <div class="swatch blue" title="Blue for training curves"></div>
-        <div class="swatch orange" title="Orange for validation curves"></div>
-        <div class="swatch purple" title="Purple for deeper models or comparisons"></div>
-      </div>
-    </section>
+    </section>    
 
     <section aria-labelledby="references-heading" id="references">
       <h2 class="section-heading" id="references-heading">6. References and Further Reading</h2>
@@ -717,18 +678,25 @@ for d in depths:
       </p>
       <ol>
         <li>
-          I. Goodfellow, Y. Bengio, A. Courville,
-          <em>Deep Learning</em>, MIT Press, 2016. (Chapters on feedforward networks and capacity /
-          regularisation.)
+          <a href="https://aikosh.indiaai.gov.in/static/Deep+Learning+Ian+Goodfellow.pdf" target="_blank" rel="noopener">
+            I. Goodfellow, Y. Bengio, A. Courville,
+            <em>Deep Learning</em>, MIT Press, 2016. (Chapters on feedforward networks and capacity /
+            regularisation.)
+          </a>
+          
         </li>
         <li>
-          Y. LeCun, Y. Bengio, G. Hinton,
-          “Deep learning,” <em>Nature</em>, 521, 436–444, 2015.
+          <a href="https://www.nature.com/articles/nature14539" target="_blank" rel="noopener">
+            Y. LeCun, Y. Bengio, G. Hinton,
+            “Deep learning,” <em>Nature</em>, 521, 436–444, 2015.
+          </a>
+          
         </li>
         <li>
           H. Xiao, K. Rasul, R. Vollgraf,
           “Fashion-MNIST: a Novel Image Dataset for Benchmarking Machine Learning Algorithms,”
-          2017. Dataset and description at the official Fashion-MNIST repository.
+          2017. Dataset and description at the official <a href="https://github.com/zalandoresearch/fashion-mnist" target="
+          _blank" rel="noopener">repository.</a> 
         </li>
         <li>
           TensorFlow/Keras documentation:
@@ -736,15 +704,15 @@ for d in depths:
           – for API details on <code>Dense</code> layers, optimisers and training loops.
         </li>
         <li>
-          Various blog posts and tutorials on overfitting, train/validation/test splits and model
-          selection were consulted to cross-check explanations, but the examples and wording here
-          are my own.
-        </li>
+          Articles on overfitting and model capacity:
+          <a href="https://machinelearningmastery.com/overfitting-and-underfitting-with-machine-learning-algorithms/" target="_blank" rel="noopener">
+            https://machinelearningmastery.com/overfitting-and-underfitting-with-machine-learning-algorithms/
+          </a>
       </ol>
       <p>
         The GitHub repository for this tutorial (including the notebook, exported figures and this
         webpage) is available at:
-        <a href="YOUR_GITHUB_REPO_URL_HERE" target="_blank" rel="noopener">YOUR_GITHUB_REPO_URL_HERE</a>.
+        <a href="https://github.com/RavikrishnanVithushan/Machine-Learning-Tutorial" target="_blank" rel="noopener">https://github.com/RavikrishnanVithushan/Machine-Learning-Tutorial</a>.
       </p>
     </section>
 
