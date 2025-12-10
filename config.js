@@ -1,0 +1,3 @@
+window.env = {
+    OPENAI_API_KEY:"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"
+};

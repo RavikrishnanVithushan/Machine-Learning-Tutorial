@@ -1256,6 +1256,7 @@ for d in depths:
       // rate change will be applied next time a new utterance is created
     })();
   </script>
+  <script src="config.js"></script>
 
   <script>
     const sendButton = document.getElementById("qa-send-btn");
@@ -1276,7 +1277,7 @@ for d in depths:
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer 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"
+          "Authorization": "Bearer"+window.env.OPENAI_API_KEY
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
