@@ -668,6 +668,30 @@
       outline: 2px solid var(--accent);
       outline-offset: 2px;
     }
+
+    #model-diagrams {
+      margin-top: 40px;
+    }
+
+    .diagram-block {
+      margin-bottom: 50px;
+    }
+
+    .flowchart-container {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .flowchart-img {
+      max-width: 95%;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease-in-out;
+    }
+
+    .flowchart-img:hover {
+      transform: scale(1.02);
+    }
   </style>
 </head>
 
@@ -749,6 +773,19 @@
           monitor both <strong>training</strong> and <strong>validation</strong> performance to see
           how well the model generalises beyond the data it directly sees during optimisation.
         </p>
+
+        <div class="diagram-block">
+          <h3>Multilayer Perceptron (MLP) Flowchart</h3>
+          <p>
+            This flowchart illustrates the structure of the MLP used in the tutorial, showing how data flows through the
+            input layer,
+            hidden layers, activation functions, and final output layer.
+          </p>
+
+          <div class="flowchart-container">
+            <img src="figures/MLS.png" alt="MLP Flowchart" class="flowchart-img">
+          </div>
+        </div>
 
         <h3>Overfitting vs generalisation</h3>
         <p>
@@ -908,6 +945,12 @@ for d in depths:
 
       <article class="card">
         <h3>4.1 Accuracy curves over epochs</h3>
+        <div class="diagram-block">
+          
+          <div class="flowchart-container">
+            <img src="figures/acc_curves.png" alt="MLP Flowchart" class="flowchart-img">
+          </div>
+        </div>
         <p>
           The first figure in the notebook shows training and validation accuracy as a function of
           epoch for each depth. In my runs, a consistent pattern emerged:
@@ -929,6 +972,12 @@ for d in depths:
         </p>
 
         <h3>4.2 Test accuracy comparison</h3>
+        <div class="diagram-block">
+
+          <div class="flowchart-container">
+            <img src="figures/test_acc_bars.png" alt="MLP Flowchart" class="flowchart-img">
+          </div>
+        </div>
         <p>
           The second figure (a simple bar chart) summarises final test accuracy. Exact numbers
           depend on the random seed, but a typical outcome was:
